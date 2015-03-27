@@ -21,9 +21,12 @@
  */
 package com.github.marabou.view;
 
+import com.github.marabou.controller.SidePanelController;
 import com.github.marabou.model.AudioFile;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -40,6 +43,12 @@ import static java.util.Arrays.asList;
 public class SidePanel {
 
     Map<ComboAndLabelNames, Combo> comboBoxes = new HashMap<>();
+    private SidePanelController controller;
+
+    public SidePanel withController(SidePanelController controller) {
+        this.controller = controller;
+        return this;
+    }
 
     protected enum ComboAndLabelNames {
 
@@ -80,9 +89,24 @@ public class SidePanel {
             label.setText(comboName.labelName);
 
             Combo combo = new Combo(composite, SWT.DROP_DOWN);
+            combo.setData(comboName);
             combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
             comboBoxes.put(comboName, combo);
+
+            combo.addModifyListener(updateOnModifyListener());
         }
+    }
+
+    private ModifyListener updateOnModifyListener() {
+        return new ModifyListener() {
+            @Override
+            public void modifyText(ModifyEvent e) {
+                Combo combo = (Combo) e.getSource();
+                ComboAndLabelNames comboAndLabelNames = (ComboAndLabelNames) combo.getData();
+
+                controller.publishPropertyChange(new PropertyChange(comboAndLabelNames, combo.getText()));
+            }
+        };
     }
 
     public void updateComboBoxes(Set<AudioFile> audioFiles) {
@@ -124,6 +148,24 @@ public class SidePanel {
     private void cleanComboBoxes() {
         for (Combo combo : comboBoxes.values()) {
             combo.removeAll();
+        }
+    }
+
+    public static class PropertyChange {
+        ComboAndLabelNames comboAndLabelNames;
+        String value;
+
+        public PropertyChange(ComboAndLabelNames comboAndLabelNames, String value) {
+            this.comboAndLabelNames = comboAndLabelNames;
+            this.value = value;
+        }
+
+        public ComboAndLabelNames getComboAndLabelNames() {
+            return comboAndLabelNames;
+        }
+
+        public String getValue() {
+            return value;
         }
     }
 }

@@ -31,16 +31,22 @@ import java.util.Set;
 
 public class SidePanelController {
 
+    private final EventBus bus;
     private SidePanel sidePanel;
 
     public SidePanelController(EventBus bus, SidePanel sidePanel) {
         bus.register(this);
         this.sidePanel = sidePanel;
+        this.bus = bus;
     }
 
     @Subscribe
     public void updateSidePanelModel(FilesSelectedEvent event) {
         Set<AudioFile> audioFiles = event.selectedAudioFiles;
         sidePanel.updateComboBoxes(audioFiles);
+    }
+
+    public void publishPropertyChange(SidePanel.PropertyChange propertyChange) {
+        bus.post(propertyChange);
     }
 }

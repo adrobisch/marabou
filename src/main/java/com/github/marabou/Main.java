@@ -76,12 +76,13 @@ public class Main {
         MainMenu mainMenu = new MainMenu(mainMenuController);
         mainMenu.init();
 
-
         Composite MainWindowComposite = new Composite(BaseGuiClass.shell, SWT.NONE);
         SashForm mainWindowSashForm = new SashForm(MainWindowComposite, SWT.HORIZONTAL);
 
         SidePanel sidePanel = new SidePanel(mainWindowSashForm);
-        new SidePanelController(bus, sidePanel);
+
+        SidePanelController sidePanelController = new SidePanelController(bus, sidePanel);
+        sidePanel.withController(sidePanelController);
 
         MainWindow mainWindow = new MainWindow(bus, mainMenu, imageLoader, userProperties, MainWindowComposite, mainWindowSashForm);
         Table table = new Table(mainWindow.getTableComposite(), SWT.MULTI);

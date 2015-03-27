@@ -21,6 +21,7 @@
  */
 package com.github.marabou.view;
 
+import com.github.marabou.controller.SidePanelController;
 import com.github.marabou.model.AudioFile;
 import com.github.marabou.view.SidePanel.ComboAndLabelNames;
 import com.google.common.collect.Sets;
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import static com.github.marabou.view.SidePanel.ComboAndLabelNames.*;
+import static org.mockito.Mockito.mock;
 
 public class SidePanelTest {
 
@@ -150,7 +152,7 @@ public class SidePanelTest {
 
     private SidePanel aSidePanelWithSwtMocked() {
         SashForm sashFormMock = new SashForm(new Shell(), 0);
-        return new SidePanel(sashFormMock);
+        return new SidePanel(sashFormMock).withController(mock(SidePanelController.class));
     }
 
     private AudioFile aValidCompleteAudioFile() {
