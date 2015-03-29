@@ -21,18 +21,18 @@
  */
 package com.github.marabou;
 
-import com.github.marabou.audio.AudioFileFilter;
-import com.github.marabou.controller.MainMenuController;
-import com.github.marabou.controller.SidePanelController;
-import com.github.marabou.controller.TableController;
-import com.github.marabou.model.Model;
-import com.github.marabou.view.*;
+import com.github.marabou.audio.loader.AudioFileFilter;
+import com.github.marabou.ui.controller.MainMenuController;
+import com.github.marabou.ui.controller.SidePanelController;
+import com.github.marabou.ui.controller.TableController;
+import com.github.marabou.audio.store.AudioFileStore;
+import com.github.marabou.ui.view.*;
 import com.github.marabou.helper.*;
 import com.github.marabou.properties.ApplicationProperties;
 import com.github.marabou.properties.PropertiesHelper;
 import com.github.marabou.properties.PropertiesLoader;
 import com.github.marabou.properties.UserProperties;
-import com.github.marabou.service.AudioFileService;
+import com.github.marabou.audio.loader.AudioFileLoader;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
@@ -62,7 +62,7 @@ public class Main {
         AboutWindow aboutWindow = new AboutWindow(applicationProperties.getVersion());
 
         AudioFileFilter audioFileFilter = new AudioFileFilter();
-        AudioFileService audioFileService = new AudioFileService(audioFileFilter);
+        AudioFileLoader audioFileLoader = new AudioFileLoader(audioFileFilter);
         SubscriberExceptionHandler eventBusExceptionHandler = new SubscriberExceptionHandler() {
             @Override
             public void handleException(Throwable exception, SubscriberExceptionContext context) {
@@ -71,8 +71,8 @@ public class Main {
             }
         };
         EventBus bus = new EventBus(eventBusExceptionHandler);
-        Model model = new Model(bus);
-        MainMenuController mainMenuController = new MainMenuController(bus, model, audioFileFilter, userProperties, audioFileService, aboutWindow);
+        AudioFileStore audioFileStore = new AudioFileStore(bus);
+        MainMenuController mainMenuController = new MainMenuController(bus, audioFileStore, userProperties, audioFileLoader, aboutWindow);
         MainMenu mainMenu = new MainMenu(mainMenuController);
         mainMenu.init();
 
@@ -84,9 +84,12 @@ public class Main {
         SidePanelController sidePanelController = new SidePanelController(bus, sidePanel);
         sidePanel.withController(sidePanelController);
 
+        ErrorWindow errorWindow = new ErrorWindow();
+        bus.register(errorWindow);
+
         MainWindow mainWindow = new MainWindow(bus, mainMenu, imageLoader, userProperties, MainWindowComposite, mainWindowSashForm);
         Table table = new Table(mainWindow.getTableComposite(), SWT.MULTI);
-        new TableController(bus, table, model);
+        new TableController(bus, table, audioFileStore);
 
         mainWindow.init();
     }
